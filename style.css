@@ -1,0 +1,450 @@
+:root {
+    /* Colores y Gradientes - Modo Oscuro */
+    --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    --glass-bg: rgba(30, 30, 30, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-highlight: rgba(255, 255, 255, 0.15);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --accent-color: #0A84FF; /* Azul iOS */
+    --dock-bg: rgba(20, 20, 30, 0.7);
+}
+
+body[data-theme="light"] {
+    --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    --glass-bg: rgba(255, 255, 255, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-highlight: rgba(255, 255, 255, 0.6);
+    --text-primary: #1d1d1f;
+    --text-secondary: rgba(0, 0, 0, 0.6);
+    --accent-color: #007AFF;
+    --dock-bg: rgba(255, 255, 255, 0.6);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    margin: 0;
+    height: 100vh; 
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; 
+}
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.app-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 100%; 
+    max-height: 100%;
+    
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
+
+@media (min-width: 500px) {
+    .app-container {
+        max-width: 380px;
+        max-height: 800px;
+        border-radius: 40px;
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* --- HEADER MEJORADO (Sin choques) --- */
+.app-header {
+    flex: 0 0 auto; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px 5px 20px;
+    z-index: 20;
+    width: 100%;
+}
+
+/* Contenedores laterales fijos */
+.header-left, .header-right {
+    width: 40px; 
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+}
+
+.app-title {
+    flex: 1; /* Toma el espacio central */
+    text-align: center;
+    font-family: 'Poppins', sans-serif; /* Tipografía Google */
+    font-weight: 600;
+    font-size: 1.4em;
+    margin: 0 5px;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+    text-shadow: none;
+    white-space: nowrap; /* Evita saltos de línea */
+}
+
+.menu-button {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+/* --- BARRA DE PESTAÑAS (NAVEGACIÓN ARRIBA) --- */
+.tabs {
+    position: relative;
+    bottom: auto; left: auto; right: auto;
+    
+    /* Margen superior para separar del título */
+    margin: 15px 15px 10px 15px; 
+    height: 50px;
+    flex: 0 0 50px;
+    
+    background: var(--dock-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 5px;
+    z-index: 10;
+}
+
+.tab-button {
+    flex: 1;
+    display: flex;
+    flex-direction: row; /* Icono y texto en línea */
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.tab-icon-wrap {
+    margin-bottom: 0;
+    border-radius: 14px;
+    padding: 4px 8px;
+    transition: background 0.3s;
+    display: flex;
+}
+
+.tab-button svg { width: 22px; height: 22px; fill: currentColor; }
+.tab-label { font-size: 0.85em; font-weight: 500; }
+
+.tab-button.active { color: var(--text-primary); }
+.tab-button.active .tab-icon-wrap { background: var(--accent-color); color: white; }
+
+/* --- CONTENIDO PRINCIPAL --- */
+.mode-content {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    height: 100%; 
+    position: relative;
+}
+.mode-content.active { display: flex; }
+
+/* --- PANTALLA (DISPLAY) --- */
+.display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; 
+    align-items: flex-end;
+    padding: 10px 20px;
+    min-height: 100px; 
+    text-align: right;
+}
+
+.rate-info {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+/* Estilo Tasa Destacada */
+#bcv-rate-display {
+    font-weight: 700;
+    transition: color 0.3s ease;
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+}
+
+.main-amount {
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+.converted-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.converted-amount {
+    font-size: 1.3em;
+    color: var(--text-secondary);
+}
+
+/* --- SECCIÓN COMPARTIR (BOTONES) --- */
+.wa-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: 10px;
+}
+
+.share-label {
+    font-size: 0.6em;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.share-buttons-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+/* Botones Base */
+.wa-btn, .tg-btn, .x-btn, .threads-btn {
+    border: none;
+    border-radius: 50%;
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    color: white;
+}
+.wa-btn:active, .tg-btn:active, .x-btn:active, .threads-btn:active { transform: scale(0.95); }
+
+/* Colores Específicos */
+.wa-btn {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4);
+}
+.tg-btn {
+    background: linear-gradient(135deg, #2AABEE, #229ED9);
+    box-shadow: 0 4px 10px rgba(42, 171, 238, 0.4);
+}
+.x-btn {
+    background: #000000;
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+.threads-btn {
+    background: #ffffff; /* Fondo Blanco */
+    border: 1px solid rgba(0,0,0,0.1);
+    color: black;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Imagen dentro de botón (para el logo PNG de Threads) */
+.social-icon-img {
+    width: 20px;
+    height: 20px;
+    display: block;
+    filter: none; /* Sin filtro, se ve negra original */
+    object-fit: contain;
+}
+
+/* --- TECLADO --- */
+.keypad {
+    flex: 0 0 auto; 
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px; 
+    padding: 10px 15px;
+    padding-bottom: 25px !important; /* Aprovechamos el espacio inferior */
+}
+
+.key {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-size: 1.4em;
+    padding: 12px 0;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.key:active { background: var(--glass-highlight); transform: scale(0.95); }
+
+.key.special {
+    background: var(--accent-color);
+    border: none;
+    color: white;
+}
+
+/* --- MODALES --- */
+.options-menu-dropdown {
+    position: absolute; top: 50px; right: 15px;
+    background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(15px);
+    border-radius: 12px; border: 1px solid var(--glass-border);
+    display: none; z-index: 200; width: 200px; overflow: hidden;
+}
+.options-menu-dropdown.show { display: block; }
+.options-menu-dropdown button {
+    width: 100%; background: none; border: none; color: white;
+    padding: 12px 15px; text-align: left; display: flex; gap: 10px; align-items: center;
+}
+
+.modal-screen {
+    display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10, 10, 20, 0.95); backdrop-filter: blur(10px);
+    z-index: 300; flex-direction: column;
+}
+.modal-screen.show { display: flex; }
+.modal-header { padding: 12px 15px; display: flex; align-items: center; border-bottom: 1px solid var(--glass-border); height: 50px; }
+.modal-close-btn { background: none; border: none; color: white; padding: 8px; }
+
+.modal-content {
+    flex: 1; overflow-y: auto; padding: 20px; text-align: center; color: var(--text-primary);
+}
+.modal-content p { margin-bottom: 12px; line-height: 1.5; color: var(--text-secondary); font-size: 0.95em; }
+.modal-content strong { color: var(--text-primary); font-size: 1.1em; display: block; margin-bottom: 5px; }
+
+/* Input Manual */
+.custom-rate-input input {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--glass-border);
+    color: white;
+    border-radius: 8px;
+    padding: 5px;
+    text-align: right;
+    width: 90px;
+}
+.setting-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px; padding: 12px; margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+/* --- MEDIA QUERIES --- */
+@media (max-height: 650px) {
+    .app-header { padding-top: 5px; }
+    .tabs { height: 45px; margin-top: 5px; }
+    .main-amount { font-size: 2.2em; }
+    .key { padding: 8px 0; font-size: 1.2em; }
+    .keypad { padding-bottom: 10px !important; gap: 6px; }
+    .display { min-height: 80px; }
+}
+
+/* Botón Instalación */
+#install-pwa-btn {
+    display: none;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 30px;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 10px auto 20px auto;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(10, 132, 255, 0.4);
+    width: 80%;
+    max-width: 250px;
+    transition: transform 0.2s;
+}
+#install-pwa-btn:active { transform: scale(0.95); }
+.install-instructions { text-align: left; padding: 10px 20px; }
+.install-section-title { color: var(--accent-color); font-weight: bold; margin-top: 15px; margin-bottom: 5px; display: block; }
+.install-instructions ol { margin: 0; padding-left: 20px; color: var(--text-secondary); font-size: 0.9em; }
+.install-instructions li { margin-bottom: 5px; }
+/* --- BANDERÍN VENEZUELA (LINK TELEGRAM) --- */
+.venezuela-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    
+    /* Dimensiones y Posición */
+    height: 24px; /* Altura delgada y elegante */
+    margin: 15px 15px 0 15px; /* Alineado con los márgenes de la app */
+    border-radius: 12px; /* Bordes redondeados estilo Glass */
+    
+    /* LA BANDERA (Gradiente CSS puro) */
+    background: linear-gradient(to bottom, 
+        #FFCC00 33%,       /* Amarillo */
+        #00247D 33%, #00247D 66%, /* Azul */
+        #CF142B 66%        /* Rojo */
+    );
+    
+    /* Sombra y Efectos */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efecto al tocar */
+.venezuela-banner:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Las Estrellas (Centradas en la franja azul) */
+.stars-container {
+    color: white;
+    font-size: 8px; /* Estrellas pequeñitas */
+    letter-spacing: 2px; /* Separación entre estrellas */
+    margin-top: -1px; /* Ajuste fino para caer en el azul */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    white-space: nowrap;
+    opacity: 0.9;
+}
+/* --- FIRMA DEL CREADOR --- */
+.creator-signature {
+    display: block;
+    text-align: center;
+    font-size: 0.75em; /* Letra pequeñita y elegante */
+    color: var(--text-secondary); /* Color gris suave */
+    text-decoration: none; /* Sin subrayado */
+    margin-top: 8px; /* Separación de la bandera */
+    margin-bottom: 5px;
+    font-weight: 500;
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+/* Efecto al pasar el mouse o tocar */
+.creator-signature:hover, .creator-signature:active {
+    opacity: 1;
+    transform: scale(1.02);
+    color: var(--accent-color); /* Se ilumina con el color de la app */
+}
