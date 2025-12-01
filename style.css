@@ -35,6 +35,8 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden; 
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* --- CONTENEDOR PRINCIPAL --- */
@@ -447,4 +449,31 @@ body {
     opacity: 1;
     transform: scale(1.02);
     color: var(--accent-color); /* Se ilumina con el color de la app */
+}
+/* Aplicar Poppins a los números grandes y al teclado */
+.main-amount, .converted-amount, .key, .rate-info {
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 0.5px; /* Un poquito de aire entre números */
+}
+
+/* Ajuste para que el teclado se vea más elegante */
+.key {
+    font-weight: 500; /* Números un poco más gruesos */
+    font-size: 1.5em; /* Tamaño ideal */
+}
+/* Botón Limpiar (C) - Tinte Rojo Cristal */
+.key.function {
+    background: rgba(239, 83, 80, 0.15); /* Rojo muy transparente */
+    border-color: rgba(239, 83, 80, 0.3);
+    color: #ffcdd2;
+}
+.key.function:active {
+    background: rgba(239, 83, 80, 0.4);
+}
+
+/* Botón Borrar (Flecha) - Tinte Naranja Cristal */
+.key.icon {
+    background: rgba(255, 167, 38, 0.15);
+    border-color: rgba(255, 167, 38, 0.3);
+    color: #ffe0b2;
 }
