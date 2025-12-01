@@ -500,7 +500,7 @@ function shareToSocial(platform, mode) {
         message = `${emjSparkle} Aureen X\n`;
         message += `Tu calculadora de Tasa BCV.\n\n`;
         message += `${emjDiamond} Rápida y precisa\n`;
-        message += `${emjDiamond} Diseño Liquid Glass\n\n`;
+        message += `${emjDiamond} Diseño Moderno\n\n`;
         message += `${emjPhone} Pruébala gratis:\n`;
         message += `${appLink}\n\n`;
         message += `#Venezuela #AureenX`;
@@ -509,12 +509,12 @@ function shareToSocial(platform, mode) {
         let usdAmount = state[mode].isFromUSD ? mainAmount : subAmount;
         let bsAmount = state[mode].isFromUSD ? subAmount : mainAmount;
 
-        message = `${emjAbacus} Cálculo Aureen\n\n`;
-        message += `${emjDollar}  ${usdAmount} $\n`;
+        message = `${emjAbacus} Cálculadora: Aureen X\n\n`;
+        message += `${emjDollar}  ${usdAmount} Monto en $\n`;
         message += `${emjDown}\n`;
-        message += `${emjFlag}  ${bsAmount} Bs\n\n`;
+        message += `${emjFlag}  ${bsAmount} Monto enBs\n\n`;
         message += `${emjChart} Tasa: ${rate}\n`;
-        message += `#TasaBCV #AureenX`;
+        message += `#TasaBCV #AureenX #Venezuela`;
     }
 
     let url = "";
