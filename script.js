@@ -1,6 +1,9 @@
-// --- CONFIGURACIÓN INICIAL ---
-let deferredInstallPrompt = null;
+// ==========================================
+// PROYECTO AUREEN X - CORE SCRIPT (v9.0 BLINDADO)
+// ==========================================
 
+// --- 1. CONFIGURACIÓN PWA ---
+let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
@@ -8,7 +11,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     if (installBtn) installBtn.style.display = 'block';
 });
 
-// --- ESTADO GLOBAL ---
+// --- 2. ESTADO GLOBAL ---
 let state = {
     bcv: { rate: 0, currentInput: "0", isFromUSD: true },
     custom: { rate: 0, currentInput: "0", isFromUSD: true },
@@ -16,223 +19,219 @@ let state = {
 };
 let currentMode = 'bcv';
 
-// --- UTILIDAD: FECHA DE HOY ---
+// --- 3. UTILIDADES ---
 function getTodayString() {
     const d = new Date();
-    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+    return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-// --- NUEVA FUNCIÓN: FORMATEAR NÚMEROS (AGREGAR PUNTOS) ---
+// HORARIO NOCTURNO: 9:00 PM (21:00) - 11:59 PM (23:59)
+function isPreviewWindow() {
+    const h = new Date().getHours();
+    return (h >= 21 && h <= 23); 
+}
+
+function isNewDay() { return !isPreviewWindow(); }
+
 function formatNumber(numStr) {
     if (!numStr) return "0";
-    // Separamos la parte entera de los decimales
     let parts = numStr.split(',');
-    // Agregamos los puntos de mil a la parte entera
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    // Unimos de nuevo (si tenía decimales, los pone, si no, queda entero)
     return parts.join(',');
 }
 
-// --- UTILIDAD: LIMPIAR NÚMEROS PARA CÁLCULOS (QUITAR PUNTOS) ---
 function parseRaw(numStr) {
-    // Quitamos los puntos y cambiamos la coma por punto para que JS entienda
     return parseFloat(numStr.replace(/\./g, '').replace(',', '.')) || 0;
 }
 
-// --- FUNCIÓN WHATSAPP (INFALIBLE) ---
-function shareToWhatsApp(mode) {
-    const shopPhoneNumber = "584141802040"; 
+// --- 4. UI SEGURA (Evita crash por null) ---
 
-    const mainAmount = document.getElementById(`${mode}-main-display`).innerText;
-    const subAmount = document.getElementById(`${mode}-sub-display`).innerText;
-    const rate = state[mode].rate.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    
-    const isZero = (mainAmount === "0" || mainAmount === "0,00" || mainAmount === "0.00" || mainAmount === "");
-    const appLink = "t.me/aureenAIbot"; 
-
-    // EMOJIS MATEMÁTICOS
-    const emjAbacus  = String.fromCodePoint(0x1F9EE);     
-    const emjDollar  = String.fromCodePoint(0x1F4B5);     
-    const emjDown    = String.fromCodePoint(0x2B07, 0xFE0F); 
-    const emjFlag    = String.fromCodePoint(0x1F1FB, 0x1F1EA); 
-    const emjChart   = String.fromCodePoint(0x1F4CA);     
-
-    let message = "";
-
-    if (isZero) {
-        const infoMessage = "Hola Erick, me gustaría solicitar información sobre el proyecto Aureen.";
-        window.open(`https://wa.me/${shopPhoneNumber}?text=${encodeURIComponent(infoMessage)}`, '_blank');
-        return; 
-    } else {
-        let usdAmount = state[mode].isFromUSD ? mainAmount : subAmount;
-        let bsAmount = state[mode].isFromUSD ? subAmount : mainAmount;
-
-        message = `*${emjAbacus} Cálculo Aureen*\n\n`;
-        message += `${emjDollar}  ${usdAmount} $\n`;
-        message += `${emjDown}\n`;
-        message += `${emjFlag}  ${bsAmount} Bs\n\n`;
-        message += `${emjChart} Tasa: ${rate}\n`;
-        message += `_#TasaBCV #AureenX_`;
-    }
-
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-}
-// --- FUNCIÓN TELEGRAM (INFALIBLE) ---
-function shareToTelegram(mode) {
-    const contactUsername = "Emanrique0"; 
-
-    const mainAmount = document.getElementById(`${mode}-main-display`).innerText;
-    const subAmount = document.getElementById(`${mode}-sub-display`).innerText;
-    const rate = state[mode].rate.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    
-    const isZero = (mainAmount === "0" || mainAmount === "0,00" || mainAmount === "0.00" || mainAmount === "");
-    const appLink = "https://t.me/aureenAIbot";
-
-    // EMOJIS MATEMÁTICOS
-    const emjAbacus  = String.fromCodePoint(0x1F9EE);     
-    const emjDollar  = String.fromCodePoint(0x1F4B5);     
-    const emjDown    = String.fromCodePoint(0x2B07, 0xFE0F); 
-    const emjFlag    = String.fromCodePoint(0x1F1FB, 0x1F1EA); 
-    const emjChart   = String.fromCodePoint(0x1F4CA);
-
-    let url = "";
-
-    if (isZero) {
-        url = `https://t.me/${contactUsername}`;
-    } else {
-        let usdAmount = state[mode].isFromUSD ? mainAmount : subAmount;
-        let bsAmount = state[mode].isFromUSD ? subAmount : mainAmount;
-        
-        let message = `${emjAbacus} Cálculo Aureen\n\n`;
-        message += `${emjDollar}  ${usdAmount} $\n`;
-        message += `${emjDown}\n`;
-        message += `${emjFlag}  ${bsAmount} Bs\n\n`;
-        message += `${emjChart} Tasa: ${rate}\n`;
-        message += `#TasaBCV #AureenX`;
-
-        url = `https://t.me/share/url?url=${encodeURIComponent(appLink)}&text=${encodeURIComponent(message)}`;
-    }
-
-    window.open(url, '_blank');
-}
-
-// --- UTILIDAD: FECHA DE HOY (FORMATO BONITO DD/MM/AAAA) ---
-function getTodayString() {
-    const d = new Date();
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0'); // Mes empieza en 0
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-}
-
-// --- FUNCIÓN MAESTRA: OBTENER TASA BCV (CON COLOR DESTAQUE) ---
-async function fetchBCVRate(forceUpdate = false) {
+function applyRateToUI(rate, dateLabel, color) {
     const bcvRateDisplay = document.getElementById('bcv-rate-display');
     const bcvDateDisplay = document.getElementById('bcv-date-display');
+    
+    // Protección: Si el elemento no existe, no hacemos nada (evita pantalla roja)
+    if (!bcvRateDisplay || !bcvDateDisplay) return;
+
+    state.bcv.rate = parseFloat(rate);
+    bcvRateDisplay.innerText = state.bcv.rate.toFixed(2).replace('.', ',');
+    bcvDateDisplay.innerText = dateLabel;
+    bcvRateDisplay.style.color = color;
+    updateDisplay('bcv');
+}
+
+function showNextRateUI(rateValue) {
+    const displayContainer = document.querySelector('.rate-info');
+    if (!displayContainer) return;
+
+    let nextInfo = document.querySelector('.next-rate-info');
+    if (!nextInfo) {
+        nextInfo = document.createElement('div');
+        nextInfo.className = 'next-rate-info';
+        displayContainer.appendChild(nextInfo);
+    }
+    
+    nextInfo.innerHTML = `
+        <span class="next-rate-label" style="color:var(--text-secondary)">Mañana:</span>
+        <span class="next-rate-value" style="color:#FF5252; font-weight:700; margin-left:5px;">
+            ${rateValue.toFixed(2).replace('.',',')}
+        </span>
+    `;
+}
+
+function clearNextRateUI() {
+    const existingNext = document.querySelector('.next-rate-info');
+    if (existingNext) existingNext.remove();
+    localStorage.removeItem('aureen-next-rate');
+}
+
+// --- 5. CORE: OBTENCIÓN DE TASA ---
+
+async function fetchBCVRate(forceUpdate = false) {
+    const bcvRateDisplay = document.getElementById('bcv-rate-display');
     const todayStr = getTodayString();
     
-    const savedRate = localStorage.getItem('aureen-bcv-rate');
+    const colorGreen = "#2ECC71"; 
+    const colorOld = "#FFB74D";   
+
+    const savedRate = parseFloat(localStorage.getItem('aureen-bcv-rate')) || 0;
     const savedDate = localStorage.getItem('aureen-bcv-date');
+    const savedNextRate = parseFloat(localStorage.getItem('aureen-next-rate')) || 0;
 
-    // COLOR PARA RESALTAR LA TASA (Verde Esmeralda)
-    const highlightColor = "#2ECC71"; 
+    // A. LIMPIEZA MEDIANOCHE
+    if (isNewDay()) clearNextRateUI();
 
-    // 1. INTENTO USAR DATOS GUARDADOS
-    if (!forceUpdate && savedRate && savedDate === todayStr) {
-        console.log(`Usando tasa guardada: ${savedRate}`);
-        state.bcv.rate = parseFloat(savedRate);
-        
-        bcvRateDisplay.innerText = state.bcv.rate.toFixed(2).replace('.', ',');
-        bcvDateDisplay.innerText = savedDate;
-        
-        // APLICAMOS EL COLOR DESTAQUE AQUÍ
-        bcvRateDisplay.style.color = highlightColor;
-        
-        updateDisplay('bcv');
-        return; 
+    // B. MOSTRAR DATOS CACHEADOS (Prioridad Visual)
+    if (savedRate > 0) {
+        const color = (savedDate === todayStr) ? colorGreen : colorOld;
+        applyRateToUI(savedRate, savedDate || "--/--", color);
+        if (isPreviewWindow() && savedNextRate > 0) showNextRateUI(savedNextRate);
     }
 
-    // 2. BUSCANDO...
-    bcvRateDisplay.innerText = "...";
-    bcvRateDisplay.style.color = "var(--secondary-text)";
-    
-    let success = false;
-    let rateFound = 0;
-
-    // A. Intento API
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000); 
-        const response = await fetch('https://ve.dolarapi.com/v1/dolares/oficial', { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data && data.promedio > 0) {
-                rateFound = parseFloat(data.promedio);
-                success = true;
-            }
+    // C. LÓGICA DE BÚSQUEDA
+    // Buscamos si: Forzamos, O es hora nocturna, O la fecha guardada no es hoy.
+    if (forceUpdate || isPreviewWindow() || savedDate !== todayStr) {
+        
+        if (forceUpdate && bcvRateDisplay) {
+            bcvRateDisplay.innerText = "...";
+            bcvRateDisplay.style.color = "var(--text-secondary)";
         }
-    } catch (e) { console.warn("API lenta..."); }
 
-    // B. Intento Proxies
-    if (!success) {
-        const proxies = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?'];
-        const bcvUrl = 'https://www.bcv.org.ve/';
+        let fetchedRate = 0;
+        let success = false;
+        const cacheBuster = `?t=${new Date().getTime()}`;
 
+        // LISTA DE PROXIES ROBUSTA
+        // allorigins es el más confiable para evitar CORS en entornos web.
+        const proxies = [
+            { url: 'https://api.allorigins.win/get?url=', type: 'json' },
+            { url: 'https://corsproxy.io/?', type: 'html' }
+        ];
+        const bcvUrl = 'https://www.bcv.org.ve/'; 
+
+        // 1. INTENTO SCRAPING (Para horario nocturno es obligatorio)
         for (const proxy of proxies) {
             if (success) break;
             try {
-                const targetUrl = proxy + encodeURIComponent(bcvUrl);
+                // Encodeamos bien la URL para evitar errores 400
+                const targetUrl = proxy.url + encodeURIComponent(bcvUrl) + cacheBuster;
                 const response = await fetch(targetUrl);
-                if (!response.ok) throw new Error('Status ' + response.status);
-                const html = await response.text();
                 
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const strongs = doc.querySelectorAll('strong');
-                for (let s of strongs) {
-                    const txt = s.textContent.trim();
-                    if (/^\d{2,3},\d{2,8}$/.test(txt)) {
-                        rateFound = parseFloat(txt.replace(',', '.'));
-                        success = true;
-                        break;
+                if (response.ok) {
+                    let htmlContent = "";
+                    
+                    if (proxy.type === 'json') {
+                        const json = await response.json();
+                        htmlContent = json.contents;
+                    } else {
+                        htmlContent = await response.text();
+                    }
+
+                    if (!htmlContent) continue;
+
+                    // PARSEO DOM (Busca id="dolar")
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlContent, 'text/html');
+                    const dolarDiv = doc.getElementById('dolar');
+
+                    if (dolarDiv) {
+                        const rawText = dolarDiv.textContent.replace(/\s+/g, ' ').trim();
+                        // Regex flexible: busca números con coma y muchos decimales
+                        const match = rawText.match(/(\d{2,3},\d{4,8})/);
+                        
+                        if (match && match[1]) {
+                            fetchedRate = parseFloat(match[1].replace(',','.'));
+                            // Validación anti-basura
+                            if (fetchedRate > 10 && fetchedRate < 5000) {
+                                success = true;
+                                console.log("✅ Tasa obtenida vía Proxy:", fetchedRate);
+                            }
+                        }
                     }
                 }
-            } catch (e) { console.warn(e); }
+            } catch(e) { console.warn("Proxy falló, probando siguiente..."); }
         }
-    }
 
-    // 3. RESULTADO FINAL
-    if (success && rateFound > 0) {
-        state.bcv.rate = rateFound;
-        localStorage.setItem('aureen-bcv-rate', rateFound);
-        localStorage.setItem('aureen-bcv-date', todayStr);
-        
-        bcvRateDisplay.innerText = state.bcv.rate.toFixed(2).replace('.', ',');
-        bcvDateDisplay.innerText = todayStr;
-        
-        // APLICAMOS EL COLOR DESTAQUE AQUÍ TAMBIÉN
-        bcvRateDisplay.style.color = highlightColor;
-        
-        updateDisplay('bcv');
-    } else {
-        if (savedRate) {
-            state.bcv.rate = parseFloat(savedRate);
-            bcvRateDisplay.innerText = state.bcv.rate.toFixed(2).replace('.', ',');
-            bcvDateDisplay.innerText = savedDate || "--/--";
-            bcvRateDisplay.style.color = "#FFB74D"; // Naranja si es dato viejo
-            updateDisplay('bcv');
+        // 2. INTENTO API (Solo de día como respaldo, prohibido de noche)
+        if (!success && !isPreviewWindow()) {
+            try {
+                const resp = await fetch('https://ve.dolarapi.com/v1/dolares/oficial' + cacheBuster);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.promedio > 0) { 
+                        fetchedRate = parseFloat(data.promedio); 
+                        success = true; 
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // D. GUARDADO INTELIGENTE
+        if (success && fetchedRate > 0) {
+            if (isPreviewWindow()) {
+                // MODO NOCHE:
+                // Si no teníamos tasa verde, la creamos. Si ya había, la dejamos quieta.
+                if (savedRate === 0) {
+                    localStorage.setItem('aureen-bcv-rate', fetchedRate);
+                    localStorage.setItem('aureen-bcv-date', todayStr);
+                    applyRateToUI(fetchedRate, todayStr, colorGreen);
+                } else {
+                    // Restauramos visualmente la verde
+                    applyRateToUI(savedRate, todayStr, colorGreen);
+                }
+                // Actualizamos la roja
+                showNextRateUI(fetchedRate);
+                localStorage.setItem('aureen-next-rate', fetchedRate);
+            } else {
+                // MODO DÍA:
+                localStorage.setItem('aureen-bcv-rate', fetchedRate);
+                localStorage.setItem('aureen-bcv-date', todayStr);
+                applyRateToUI(fetchedRate, todayStr, colorGreen);
+                clearNextRateUI();
+            }
         } else {
-            bcvRateDisplay.innerText = "Reintentar";
-            bcvDateDisplay.innerText = "--/--";
-            bcvRateDisplay.style.color = "#EF5350"; // Rojo error
-            bcvRateDisplay.onclick = () => fetchBCVRate(true);
+            // FALLO TOTAL
+            if (savedRate > 0) {
+                applyRateToUI(savedRate, savedDate || "--/--", (savedDate === todayStr) ? colorGreen : colorOld);
+            } else if (bcvRateDisplay) {
+                bcvRateDisplay.innerText = "Reintentar";
+                bcvRateDisplay.style.color = "#EF5350";
+            }
         }
     }
 }
 
-// --- INICIALIZACIÓN ---
+// --- 6. VIGILANTE ---
+function startNightlyWatcher() {
+    if (isPreviewWindow()) fetchBCVRate(true);
+    setInterval(() => {
+        const h = new Date().getHours();
+        const m = new Date().getMinutes();
+        if ((h === 21 && m === 0) || (h === 0 && m === 0)) fetchBCVRate(true);
+    }, 60000);
+}
+
+// --- 7. INICIALIZACIÓN ---
 window.onload = function() {
     try { Telegram.WebApp.ready(); } catch (e) {}
 
@@ -243,24 +242,26 @@ window.onload = function() {
     }
 
     try { state.general.history = JSON.parse(localStorage.getItem('aureen-calc-history')) || []; } catch (e) {}
+    
+    // Service Worker: Solo registrar si el protocolo es seguro (http/https)
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+        navigator.serviceWorker.register('sw.js').catch(console.error);
+    }
 
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(console.error);
-
-    fetchBCVRate();
+    fetchBCVRate();        
+    startNightlyWatcher(); 
     updateDisplay('custom');
     updateDisplay('general');
 
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (!isStandalone) {
         setTimeout(() => {
-            if (!sessionStorage.getItem('install-modal-closed')) {
-                showModal('install-pwa-modal');
-            }
+            if (!sessionStorage.getItem('install-modal-closed')) showModal('install-pwa-modal');
         }, 3000);
     }
 };
 
-// --- LÓGICA UI Y CÁLCULOS ---
+// --- 8. FUNCIONES DE CALCULADORA (CORE) ---
 function switchMode(mode) {
     document.getElementById('options-menu').classList.remove('show');
     currentMode = mode;
@@ -269,281 +270,121 @@ function switchMode(mode) {
     document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
     document.getElementById(`btn-${mode}`).classList.add('active');
 }
-
 function appendNumber(number, mode) {
-    // Agregamos el número a la cadena "cruda" (sin puntos)
-    if (state[mode].currentInput === "0" && number !== '00') {
-        state[mode].currentInput = number;
-    } else if (state[mode].currentInput !== "0" || (state[mode].currentInput === "0" && number === '00') ) {
-         // Limitamos a 15 dígitos para evitar errores de JS
-         // (eliminamos puntos y comas para contar los dígitos reales)
-         if(state[mode].currentInput.replace(/[,.]/g, '').length < 15) {
-             state[mode].currentInput += number;
-         }
+    if (state[mode].currentInput === "0" && number !== '00') state[mode].currentInput = number;
+    else if (state[mode].currentInput !== "0" || (state[mode].currentInput === "0" && number === '00')) {
+         if(state[mode].currentInput.replace(/[,.]/g, '').length < 15) state[mode].currentInput += number;
     }
     updateDisplay(mode);
 }
-
 function appendDecimal(mode) {
-    if (!state[mode].currentInput.includes(',')) {
-        state[mode].currentInput += ',';
-    }
+    if (!state[mode].currentInput.includes(',')) state[mode].currentInput += ',';
     updateDisplay(mode);
 }
-
 function deleteLast(mode) {
     state[mode].currentInput = state[mode].currentInput.slice(0, -1);
     if (state[mode].currentInput === "") state[mode].currentInput = "0";
     updateDisplay(mode);
 }
-
 function clearAll(mode) {
     state[mode].currentInput = "0";
-    if (mode === 'general') {
-        state.general.previousInput = "";
-        state.general.operation = null;
-    }
+    if (mode === 'general') { state.general.previousInput = ""; state.general.operation = null; }
     updateDisplay(mode);
 }
-
 function updateDisplay(mode) {
     if (mode === 'bcv' || mode === 'custom') {
-        const fromSymbol = document.getElementById(`${mode}-from-symbol`);
-        const toSymbol = document.getElementById(`${mode}-to-symbol`);
         const mainDisplay = document.getElementById(`${mode}-main-display`);
         const subDisplay = document.getElementById(`${mode}-sub-display`);
+        const fromSymbol = document.getElementById(`${mode}-from-symbol`);
+        const toSymbol = document.getElementById(`${mode}-to-symbol`);
         
         if (mode === 'custom') {
             const inputVal = document.getElementById('custom-rate-input').value;
             state.custom.rate = parseFloat(inputVal.replace(',', '.')) || 0;
         }
-        
-        const currentRate = state[mode].rate;
-        
-        // --- AQUÍ ESTÁ LA MAGIA DEL FORMATO ---
-        // Usamos formatNumber para mostrar "1.000.000" en vez de "1000000"
         mainDisplay.innerText = formatNumber(state[mode].currentInput);
-        
-        if (currentRate === 0) {
-            subDisplay.innerText = "0,00";
-            return;
-        }
-
-        // Para calcular, usamos la versión limpia (sin puntos)
+        const currentRate = state[mode].rate;
+        if (currentRate === 0) { subDisplay.innerText = "0,00"; return; }
         const mainValue = parseRaw(state[mode].currentInput);
-        let subValue = 0;
-
-        if (state[mode].isFromUSD) {
-            subValue = mainValue * currentRate;
-            fromSymbol.innerText = "$"; toSymbol.innerText = "Bs";
-        } else {
-            subValue = mainValue / currentRate;
-            fromSymbol.innerText = "Bs"; toSymbol.innerText = "$";
-        }
-
+        let subValue = state[mode].isFromUSD ? (mainValue * currentRate) : (mainValue / currentRate);
+        if (state[mode].isFromUSD) { fromSymbol.innerText = "$"; toSymbol.innerText = "Bs"; }
+        else { fromSymbol.innerText = "Bs"; toSymbol.innerText = "$"; }
         if (!isFinite(subValue) || isNaN(subValue)) subValue = 0;
         subDisplay.innerText = subValue.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    
     } else if (mode === 'general') {
-        // En la calculadora general también aplicamos el formato visual
         document.getElementById('general-main-display').innerText = formatNumber(state.general.currentInput);
-        
         if(state.general.operation != null) {
-            // Formateamos también el número anterior pequeño
-            const prevFormatted = formatNumber(state.general.previousInput);
-            document.getElementById('general-sub-display').innerText = `${prevFormatted} ${state.general.operation}`;
+            document.getElementById('general-sub-display').innerText = `${formatNumber(state.general.previousInput)} ${state.general.operation}`;
         } else {
             document.getElementById('general-sub-display').innerText = '';
         }
     }
 }
-
 function swapCurrencies(mode) {
     state[mode].isFromUSD = !state[mode].isFromUSD;
     const subDisplayText = document.getElementById(`${mode}-sub-display`).innerText;
-    // Al cambiar, tomamos el valor formateado y lo limpiamos para guardarlo en el estado
-    const subValueRaw = parseRaw(subDisplayText);
-    
-    // Lo guardamos como string con coma decimal
-    state[mode].currentInput = subValueRaw.toString().replace('.', ',');
+    state[mode].currentInput = parseRaw(subDisplayText).toString().replace('.', ',');
     updateDisplay(mode);
 }
 
-// --- CALCULADORA GENERAL ---
-function chooseOperation(op) {
-    if(state.general.currentInput === '0' && state.general.previousInput === '') return;
-    if(state.general.previousInput !== '') calculate();
-    state.general.operation = op;
-    state.general.previousInput = state.general.currentInput;
-    state.general.currentInput = '0';
-    updateDisplay('general');
-}
-
-function calculate() {
-    let result;
-    const prev = parseRaw(state.general.previousInput);
-    const current = parseRaw(state.general.currentInput);
-    const op = state.general.operation;
-
-    if(isNaN(prev) || isNaN(current)) return;
-
-    switch(op) {
-        case '+': result = prev + current; break;
-        case '-': result = prev - current; break;
-        case '×': result = prev * current; break;
-        case '÷': result = prev / current; break;
-        case '^': result = Math.pow(prev, current); break;
-        case '%': result = (prev / 100) * current; break;
-        default: return;
-    }
-
-    // 1. Para el Historial: Queremos que se vea bonito con puntos (ej: 1.200,50)
-    const resultForHistory = result.toLocaleString('es-VE', { maximumFractionDigits: 10 });
-
-    // 2. Para el Estado (Memoria): Queremos el número crudo pero con coma (ej: 1200,50)
-    // (Esto es vital para poder seguir operando sobre el resultado)
-    let resultForState = result.toString().replace('.', ',');
-    
-    state.general.history.unshift({
-        operation: `${formatNumber(state.general.previousInput)} ${op} ${formatNumber(state.general.currentInput)}`,
-        result: resultForHistory
-    });
-    
-    if (state.general.history.length > 50) state.general.history.pop();
-    localStorage.setItem('aureen-calc-history', JSON.stringify(state.general.history));
-
-    state.general.currentInput = resultForState;
-    state.general.operation = null;
-    state.general.previousInput = '';
-    updateDisplay('general');
-    if(document.getElementById('history-screen').classList.contains('show')) renderHistory();
-}
-
-// --- UI EXTRAS ---
+// --- 9. UI EXTRAS ---
 function toggleOptionsMenu() { document.getElementById('options-menu').classList.toggle('show'); }
-
 function showModal(id) { 
     document.getElementById(id).classList.add('show'); 
     document.getElementById('options-menu').classList.remove('show');
     if (id === 'history-screen') renderHistory();
 }
-
 function closeModal(id) { 
     document.getElementById(id).classList.remove('show');
-    if (id === 'install-pwa-modal') {
-        sessionStorage.setItem('install-modal-closed', 'true');
-    }
+    if (id === 'install-pwa-modal') sessionStorage.setItem('install-modal-closed', 'true');
 }
-
 function toggleTheme() {
     const toggle = document.getElementById('theme-toggle');
-    if (toggle.checked) {
-        document.body.setAttribute('data-theme', 'light');
-        localStorage.setItem('aureen-calc-theme', 'light');
-    } else {
-        document.body.removeAttribute('data-theme');
-        localStorage.setItem('aureen-calc-theme', 'dark');
-    }
+    if (toggle.checked) { document.body.setAttribute('data-theme', 'light'); localStorage.setItem('aureen-calc-theme', 'light'); }
+    else { document.body.removeAttribute('data-theme'); localStorage.setItem('aureen-calc-theme', 'dark'); }
 }
-
-function renderHistory() {
-    const container = document.getElementById('history-content-area');
-    if (!container) return;
-    if (state.general.history.length === 0) {
-        container.innerHTML = '<p class="history-empty-message">No hay cálculos guardados.</p>';
-        return;
-    }
-    let html = '';
-    state.general.history.forEach(item => {
-        html += `<div class="history-item"><span class="operation">${item.operation}</span><span class="result">= ${item.result}</span></div>`;
-    });
-    container.innerHTML = html;
-}
-
-function clearHistory() {
-    state.general.history = [];
-    localStorage.removeItem('aureen-calc-history');
-    renderHistory();
-}
-
-function triggerInstallPrompt() {
-    if (deferredInstallPrompt) deferredInstallPrompt.prompt();
-}
-
+function triggerInstallPrompt() { if (deferredInstallPrompt) deferredInstallPrompt.prompt(); }
 window.addEventListener('click', (e) => {
     const menu = document.getElementById('options-menu');
     const btn = document.getElementById('options-menu-btn');
     if (e.target && !menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('show');
 });
-// --- FUNCIÓN REDES SOCIALES (INFALIBLE) ---
-function shareToSocial(platform, mode) {
+
+// Compartir
+function shareToWhatsApp(mode) {
+    const shopPhoneNumber = "584141802040"; 
     const mainAmount = document.getElementById(`${mode}-main-display`).innerText;
     const subAmount = document.getElementById(`${mode}-sub-display`).innerText;
     const rate = state[mode].rate.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    
-    const isZero = (mainAmount === "0" || mainAmount === "0,00" || mainAmount === "0.00" || mainAmount === "");
-    const appLink = "t.me/aureenAIbot"; 
-
-    // CONSTRUIMOS LOS EMOJIS CON CÓDIGO MATEMÁTICO (No fallan nunca)
-    const emjSparkle = String.fromCodePoint(0x2728);      // ✨
-    const emjDiamond = String.fromCodePoint(0x1F539);     // 🔹
-    const emjPhone   = String.fromCodePoint(0x1F4F2);     // 📲
-    const emjAbacus  = String.fromCodePoint(0x1F9EE);     // 🧮
-    const emjDollar  = String.fromCodePoint(0x1F4B5);     // 💵
-    const emjDown    = String.fromCodePoint(0x2B07, 0xFE0F); // ⬇️
-    const emjFlag    = String.fromCodePoint(0x1F1FB, 0x1F1EA); // 🇻🇪 (Bandera VE)
-    const emjChart   = String.fromCodePoint(0x1F4CA);     // 📊
-
-    let message = "";
-
-    if (isZero) {
-        message = `${emjSparkle} Aureen X\n`;
-        message += `Tu calculadora de Tasa BCV.\n\n`;
-        message += `${emjDiamond} Rápida y precisa\n`;
-        message += `${emjDiamond} Diseño Moderno\n\n`;
-        message += `${emjPhone} Pruébala gratis:\n`;
-        message += `${appLink}\n\n`;
-        message += `#Venezuela #AureenX`;
-
-    } else {
-        let usdAmount = state[mode].isFromUSD ? mainAmount : subAmount;
-        let bsAmount = state[mode].isFromUSD ? subAmount : mainAmount;
-
-        message = `${emjAbacus} Cálculadora: Aureen X\n\n`;
-        message += `${emjDollar}  ${usdAmount} Monto en $\n`;
-        message += `${emjDown}\n`;
-        message += `${emjFlag}  ${bsAmount} Monto enBs\n\n`;
-        message += `${emjChart} Tasa: ${rate}\n`;
-        message += `#TasaBCV #AureenX #Venezuela`;
+    if (parseRaw(state[mode].currentInput) === 0) {
+        window.open(`https://wa.me/${shopPhoneNumber}?text=${encodeURIComponent("Hola Erick, información sobre Aureen.")}`, '_blank');
+        return; 
     }
-
+    const emjAbacus = String.fromCodePoint(0x1F9EE);     
+    const emjDollar = String.fromCodePoint(0x1F4B5);     
+    const emjFlag   = String.fromCodePoint(0x1F1FB, 0x1F1EA); 
+    let message = `*${emjAbacus} Cálculo Aureen*\n\n${emjDollar} ${state[mode].isFromUSD ? mainAmount : subAmount} $\n${emjFlag} ${state[mode].isFromUSD ? subAmount : mainAmount} Bs\n\nTasa: ${rate}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+}
+function shareToTelegram(mode) { shareToSocialGeneric('telegram', mode); }
+function shareToSocial(platform, mode) { shareToSocialGeneric(platform, mode); }
+function shareToSocialGeneric(platform, mode) {
+    const mainAmount = document.getElementById(`${mode}-main-display`).innerText;
+    const subAmount = document.getElementById(`${mode}-sub-display`).innerText;
+    const rate = state[mode].rate.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     let url = "";
-    const encodedText = encodeURIComponent(message);
-
-    if (platform === 'x') {
-        url = `https://twitter.com/intent/tweet?text=${encodedText}`;
-    } else if (platform === 'threads') {
-        url = `https://www.threads.net/intent/post?text=${encodedText}`;
-    }
-
+    let msg = `Aureen Calc:\n$${state[mode].isFromUSD ? mainAmount : subAmount} = Bs${state[mode].isFromUSD ? subAmount : mainAmount}\nTasa: ${rate}`;
+    if (parseRaw(state[mode].currentInput) === 0) msg = "Prueba Aureen X Calculator.";
+    if (platform === 'telegram') url = `https://t.me/share/url?url=https://t.me/aureenAIbot&text=${encodeURIComponent(msg)}`;
+    else if (platform === 'x') url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(msg)}`;
+    else if (platform === 'threads') url = `https://www.threads.net/intent/post?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
 }
-// --- FEEDBACK TÁCTIL (VIBRACIÓN) ---
-function triggerHaptic() {
-    // Verificamos si el navegador soporta vibración
-    if (navigator.vibrate) {
-        navigator.vibrate(15); // Vibración muy corta y seca (15ms)
-    }
-}
 
-// --- CONECTAR VIBRACIÓN A TODOS LOS BOTONES ---
+// Haptic
+function triggerHaptic() { if (navigator.vibrate) navigator.vibrate(15); }
 document.addEventListener('DOMContentLoaded', () => {
-    // Seleccionamos todos los elementos clicables importantes
-    const buttons = document.querySelectorAll('button, .venezuela-banner, .creator-signature, .main-amount, .converted-amount');
-    
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            triggerHaptic();
-        });
+    document.querySelectorAll('button, .venezuela-banner, .creator-signature, .main-amount, .converted-amount').forEach(btn => {
+        btn.addEventListener('click', () => triggerHaptic());
     });
 });
