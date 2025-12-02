@@ -477,3 +477,54 @@ body {
     border-color: rgba(255, 167, 38, 0.3);
     color: #ffe0b2;
 }
+/* --- BADGE INDICADOR DE "MAÑANA" --- */
+.tomorrow-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255, 215, 0, 0.1); /* Fondo dorado muy sutil */
+    color: #FFD700; /* Texto dorado brillante */
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 500;
+    margin-left: 6px;
+    vertical-align: text-bottom;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* --- TASA PREVIA (MODO NOCTURNO DUAL) --- */
+.next-rate-info {
+    font-size: 0.85em;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: flex-end; /* Alineado a la derecha como el resto */
+    align-items: center;
+    gap: 6px;
+    opacity: 0; /* Empieza invisible */
+    animation: slideDown 0.4s forwards;
+}
+
+@keyframes slideDown {
+    to { opacity: 1; margin-top: 4px; }
+}
+
+.next-rate-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.next-rate-value {
+    color: #FF5252; /* Rojo Intenso para señalar "Alerta/Cambio" */
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    font-variant-numeric: tabular-nums; /* Para que los números no bailen */
+    text-shadow: 0 0 10px rgba(255, 82, 82, 0.25); /* Glow rojo suave */
+}
